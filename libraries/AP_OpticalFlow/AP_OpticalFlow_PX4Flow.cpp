@@ -118,19 +118,40 @@ void AP_OpticalFlow_PX4Flow::timer(void)
     struct OpticalFlow::OpticalFlow_state state {};
     state.device_id = get_address();
 
+    // printf("%hu\n", frame.integration_timespan);
+
     if (frame.integration_timespan > 0) {
+        //printf("frame.integration_timespan: %hu\n", frame.integration_timespan);
+        //printf("frame.qual: %u\n", frame.qual);
+
         const Vector2f flowScaler = _flowScaler();
         float flowScaleFactorX = 1.0f + 0.001f * flowScaler.x;
         float flowScaleFactorY = 1.0f + 0.001f * flowScaler.y;
         float integralToRate = 1.0e6 / frame.integration_timespan;
-        
+
+        float scaled_pixel_flow_x_integral = frame.pixel_flow_x_integral * flowScaleFactorX * 1.0e-4 * integralToRate;
+        float scaled_pixel_flow_y_integral = frame.pixel_flow_y_integral * flowScaleFactorY * 1.0e-4 * integralToRate;
+        float scaled_gyro_x_rate_integral = frame.gyro_x_rate_integral * 1.0e-4 * integralToRate;
+        float scaled_gyro_y_rate_integral = frame.gyro_y_rate_integral * 1.0e-4 * integralToRate;
+
+        //printf("scaled_pixel_flow_x_integral: %f\n", scaled_pixel_flow_x_integral);
+        //printf("scaled_pixel_flow_y_integral: %f\n", scaled_pixel_flow_y_integral);
+        //printf("scaled_gyro_x_rate_integral: %f\n", scaled_gyro_x_rate_integral);
+        //printf("scaled_gyro_y_rate_integral: %f\n", scaled_gyro_y_rate_integral);
+
         state.surface_quality = frame.qual;
         state.flowRate = Vector2f(frame.pixel_flow_x_integral * flowScaleFactorX,
                                   frame.pixel_flow_y_integral * flowScaleFactorY) * 1.0e-4 * integralToRate;
         state.bodyRate = Vector2f(frame.gyro_x_rate_integral, frame.gyro_y_rate_integral) * 1.0e-4 * integralToRate;
-        
+
         _applyYaw(state.flowRate);
         _applyYaw(state.bodyRate);
+
+        //printf("rotated_scaled_pixel_flow_x_integral: %f\n", state.flowRate.x);
+        //printf("rotated_scaled_pixel_flow_y_integral: %f\n", state.flowRate.y);
+        //printf("rotated_scaled_gyro_x_rate_integral: %f\n", state.bodyRate.x);
+        //printf("rotated_scaled_gyro_y_rate_integral: %f\n", state.bodyRate.y);
+
     }
 
     _update_frontend(state);
