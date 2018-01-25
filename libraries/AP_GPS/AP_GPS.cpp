@@ -860,7 +860,13 @@ void AP_GPS::send_mavlink_gps_raw(mavlink_channel_t chan)
         get_vdop(0),
         ground_speed(0)*100,  // cm/s
         ground_course(0)*100, // 1/100 degrees,
-        num_sats(0));
+        num_sats(0),
+        (int32_t)0,
+        (uint32_t)0,
+        (uint32_t)0,
+        (uint32_t)0,
+        (uint32_t)0
+      );
 }
 
 void AP_GPS::send_mavlink_gps2_raw(mavlink_channel_t chan)
