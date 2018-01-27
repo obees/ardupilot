@@ -20,7 +20,7 @@ extern const AP_HAL::HAL& hal;
 OpticalFlow_backend::OpticalFlow_backend(OpticalFlow &_frontend) :
     frontend(_frontend)
 {
-    _sem = hal.util->new_semaphore();    
+    _sem = hal.util->new_semaphore();
 }
 
 OpticalFlow_backend::~OpticalFlow_backend(void)
@@ -46,8 +46,8 @@ void OpticalFlow_backend::_applyYaw(Vector2f &v)
     }
     float cosYaw = cosf(yawAngleRad);
     float sinYaw = sinf(yawAngleRad);
-    float x = v.x;
-    float y = v.y;
+    float x = -v.x;
+    float y = -v.y;
     v.x = cosYaw * x - sinYaw * y;
     v.y = sinYaw * x + cosYaw * y;
 }
